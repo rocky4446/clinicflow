@@ -20,6 +20,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer"
 import { Button } from "@/components/ui/button"
+import { useUser } from "@/lib/UserContext"
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
@@ -32,6 +33,7 @@ export function Sidebar() {
   const [active, setActive] = useState("Dashboard")
   const [collapsed, setCollapsed] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const { user, logout } = useUser()
 
   const NavLinks = ({ collapsed }: { collapsed: boolean }) => (
     <nav className="flex flex-col gap-2 mt-4">
@@ -120,6 +122,25 @@ export function Sidebar() {
 
         <div className="flex-1 overflow-y-auto px-2">
           <NavLinks collapsed={collapsed} />
+        </div>
+
+        {/* User Info */}
+        {user && (
+          <div className="flex flex-col items-center mt-6">
+            <div className="font-semibold text-blue-700">{user.name}</div>
+            <div className="text-xs text-gray-500">{user.role}</div>
+          </div>
+        )}
+
+        {/* Logout Button */}
+        <div className="mt-8 px-4">
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={logout}
+          >
+            Logout
+          </Button>
         </div>
       </div>
 

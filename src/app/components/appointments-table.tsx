@@ -50,7 +50,18 @@ export default function AppointmentsTable({ search, status, date }: Appointments
   useEffect(() => {
     async function fetchAppointments() {
       setLoading(true)
-      let url = `/api/appointments?doctorId=doc1`
+      // Get doctorId from localStorage user context if available
+      let doctorId = 'doc1';
+      if (typeof window !== 'undefined') {
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+          try {
+            const user = JSON.parse(userStr);
+            doctorId = user.id || doctorId;
+          } catch {}
+        }
+      }
+      let url = `/api/appointments?doctorId=${doctorId}`
       // Add date filter
       if (date) url += `&date=${date}`
       const res = await fetch(url)

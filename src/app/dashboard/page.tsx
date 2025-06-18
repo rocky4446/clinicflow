@@ -1,5 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react'
+import { useRouter } from "next/navigation";
+import { useUser } from "@/lib/UserContext";
 
 import { StatCard } from "../components/stat-card"
 import {
@@ -12,8 +14,6 @@ import { RecentAppointments } from '../components/recent-appointments'
 import { QuickActions } from '../components/quick-actions'
 import { SystemStatus } from '../components/system-status'
 
-const doctorId = 'doc1'; // TODO: Replace with actual logged-in doctor ID
-
 const Dashboard = () => {
   const [stats, setStats] = useState({
     todayAppointments: [],
@@ -23,17 +23,26 @@ const Dashboard = () => {
     voiceBookings: 0,
   });
   const [loading, setLoading] = useState(true);
+  const { user } = useUser();
+  const router = useRouter();
 
   useEffect(() => {
-    async function fetchStats() {
-      setLoading(true);
-      const res = await fetch(`/api/appointments?doctorId=${doctorId}`);
-      const data = await res.json();
-      setStats(data);
-      setLoading(false);
+    if (!loading && (!user)) {
+      router.replace('/login');
+      return;
     }
-    fetchStats();
-  }, []);
+    if (!loading && user) {
+      async function fetchStats() {
+        setLoading(true);
+        if (!user) return;
+        const res = await fetch(`/api/appointments?doctorId=${user.id}`);
+        const data = await res.json();
+        setStats(data);
+        setLoading(false);
+      }
+      fetchStats();
+    }
+  }, [router, user, loading]);
 
   const cardData = [
     {
@@ -69,7 +78,7 @@ const Dashboard = () => {
       <main className="w-full max-w-7xl px-2 md:px-8 py-6">
         <h1 className="text-2xl font-bold">Doctor&apos;s Dashboard</h1>
         <div className="mt-4 p-2">
-          <h2 className="text-4xl font-bold">Good morning, Dr. Smith</h2>
+          <h2 className="text-4xl font-bold">Good morning, {user ? user.name : 'Doctor'}</h2>
           <p className="text-zinc-400 mt-2">Here&apos;s what&apos;s happening with your practice today.</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

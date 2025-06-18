@@ -16,7 +16,6 @@ interface Medicine {
 
 export function PrescriptionGenerator() {
   const { id: patientId } = useParams<{ id: string }>();
-  const doctorId = 'doc1' // TODO: Replace with actual logged-in doctor
   const [symptoms, setSymptoms] = useState("")
   const [loading, setLoading] = useState(false)
   const [medicines, setMedicines] = useState<Medicine[]>([])
@@ -27,6 +26,17 @@ export function PrescriptionGenerator() {
   useEffect(() => {
     async function fetchPatientAndPrescriptions() {
       setLoading(true)
+      // Get doctorId from localStorage user context if available
+      let doctorId = 'doc1';
+      if (typeof window !== 'undefined') {
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+          try {
+            const user = JSON.parse(userStr);
+            doctorId = user.id || doctorId;
+          } catch {}
+        }
+      }
       // Fetch patient allergies
       const patientRes = await fetch(`/api/patients?doctorId=${doctorId}`)
       if (!patientRes.ok) {
@@ -60,7 +70,7 @@ export function PrescriptionGenerator() {
       }
       setLoading(false)
     }
-    fetchPatientAndPrescriptions()
+    fetchPatientAndPrescriptions();
   }, [patientId])
 
   const handleGenerate = async () => {
@@ -92,7 +102,7 @@ export function PrescriptionGenerator() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         patientId,
-        doctorId,
+        doctorId: 'doc1', // TODO: Replace with actual logged-in doctor
         symptoms,
         medicines: medicines.map(m => `${m.name} (${m.dosage}) - ${m.instructions}`),
         diagnosis: '',

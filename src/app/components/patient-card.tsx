@@ -24,7 +24,18 @@ export function PatientCard() {
   useEffect(() => {
     async function fetchPatient() {
       setLoading(true);
-      const res = await fetch(`/api/patients?doctorId=doc1`);
+      // Get doctorId from localStorage user context if available
+      let doctorId = 'doc1';
+      if (typeof window !== 'undefined') {
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+          try {
+            const user = JSON.parse(userStr);
+            doctorId = user.id || doctorId;
+          } catch {}
+        }
+      }
+      const res = await fetch(`/api/patients?doctorId=${doctorId}`);
       const patients: Patient[] = await res.json();
       const found = patients.find((p) => p.id === id);
       setPatient(found || null);
